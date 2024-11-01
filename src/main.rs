@@ -4,7 +4,7 @@ use serde::Serialize;
 
 #[derive(Serialize)]
 struct SensorData {
-    idx: i64,
+    id: i64,
     tempc: String,
     tempf: String,
     humi: String,
@@ -17,7 +17,7 @@ async fn get_last_entry() -> Result<SensorData> {
     let mut stmt = conn.prepare("SELECT idx, tempc, tempf, humi, date, time FROM sensor ORDER BY idx DESC LIMIT 1")?;
     let sensor_data = stmt.query_row(params![], |row| {
         Ok(SensorData {
-            idx: row.get(0)?,
+            id: row.get(0)?,
             tempc: row.get(1)?,
             tempf: row.get(2)?,
             humi: row.get(3)?,
