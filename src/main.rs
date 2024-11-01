@@ -14,7 +14,7 @@ struct SensorData {
 
 async fn get_last_entry() -> Result<SensorData> {
     let conn = Connection::open("/usr/share/dht11rs/dht11rs/sensor_data.db")?;
-    let mut stmt = conn.prepare("SELECT id, tempc, tempf, humi, date, time FROM sensor ORDER BY idx DESC LIMIT 1")?;
+    let mut stmt = conn.prepare("SELECT id, tempc, tempf, humi, date, time FROM sensor ORDER BY id DESC LIMIT 1")?;
     let sensor_data = stmt.query_row(params![], |row| {
         Ok(SensorData {
             id: row.get(0)?,
