@@ -1,0 +1,11 @@
+[Unit]
+Description=Rust Application Service
+After=network.target
+
+[Service]
+WorkingDirectory=/path/to/your/application
+ExecStart=/usr/share/dht11serv/dht11serv/target/release/dht11serv
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
