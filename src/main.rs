@@ -1,3 +1,4 @@
+use actix_cors::Cors;
 use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use rusqlite::{params, Connection, Result};
 use serde::Serialize;
@@ -62,10 +63,15 @@ async fn humi() -> impl Responder {
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
+            .wrap(Cors::default()
+                .allow_any_origin()
+                .allow_any_method()
+                .allow_any_header()
+                .max_age(3600))
             .route("/tempc", web::get().to(tempc))
             .route("/tempf", web::get().to(tempf))
             .route("/humi", web::get().to(humi))
-    })
+        })
     .bind("10.0.4.60:8080")?
     .run()
     .await
