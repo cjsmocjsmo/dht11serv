@@ -11,6 +11,7 @@ struct SensorData {
     humi: String,
     date: String,
     time: String,
+    timestamp: String,
 }
 
 async fn get_last_entry() -> Result<SensorData> {
@@ -23,7 +24,8 @@ async fn get_last_entry() -> Result<SensorData> {
             tempf: row.get(2)?,
             humi: row.get(3)?,
             date: row.get(4)?,
-            time: row.get(4)?,
+            time: row.get(5)?,
+            timestamp: row.get(6)?,
         })
     })?;
     Ok(sensor_data)
@@ -59,6 +61,16 @@ async fn humi() -> impl Responder {
     }
 }
 
+async fn time_stamp() -> impl Responder {
+    match get_last_entry().await {
+        Ok(sensor_data) => HttpResponse::Ok().json(sensor_data.timestamp),
+        Err(e) => {
+            eprintln!("Error querying the database: {}", e);
+            HttpResponse::InternalServerError().body("Internal Server Error")
+        }
+    }
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
@@ -71,6 +83,7 @@ async fn main() -> std::io::Result<()> {
             .route("/tempc", web::get().to(tempc))
             .route("/tempf", web::get().to(tempf))
             .route("/humi", web::get().to(humi))
+            .route("/timestamp", web::get().to(time_stamp))
         })
     .bind("10.0.4.60:8080")?
     .run()
