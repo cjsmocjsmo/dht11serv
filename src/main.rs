@@ -2,6 +2,7 @@ use actix_cors::Cors;
 use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use rusqlite::{params, Connection, Result};
 use serde::Serialize;
+use chrono::{DateTime, Local};
 
 #[derive(Serialize)]
 struct SensorData {
@@ -29,6 +30,75 @@ async fn get_last_entry() -> Result<SensorData> {
         })
     })?;
     Ok(sensor_data)
+}
+
+fn get_current_date() -> String {
+    let local: DateTime<Local> = Local::now();
+    local.format("%Y-%m-%d").to_string()
+}
+
+async fn todays_data() -> Result<Vec<SensorData>> {
+    let date = get_current_date();
+    let conn = Connection::open("/usr/share/dht11rs/dht11rs/sensor_data.db")?;
+    let stmstr = format!(
+        "SELECT id, tempc, tempf, humi, date, time, timestamp FROM sensor WHERE date = '{}'",
+        date
+    );
+    let mut stmt = conn.prepare(&stmstr)?;
+    let sensor_data_iter = stmt.query_map(params![], |row| {
+        Ok(SensorData {
+            id: row.get(0)?,
+            tempc: row.get(1)?,
+            tempf: row.get(2)?,
+            humi: row.get(3)?,
+            date: row.get(4)?,
+            time: row.get(5)?,
+            timestamp: row.get(6)?,
+        })
+    })?;
+    
+    let sensor_data_vec: Vec<SensorData> = sensor_data_iter.filter_map(Result::ok).collect();
+    Ok(sensor_data_vec)
+}
+
+async fn get_todays_tempf() -> impl Responder {
+    match todays_data().await {
+        Ok(sensor_data) => {
+            let tempf_vec: Vec<String> = sensor_data.iter().map(|x| x.tempf.clone()).collect();
+            HttpResponse::Ok().json(tempf_vec)
+        }
+        Err(e) => {
+            eprintln!("Error querying the database: {}", e);
+            HttpResponse::InternalServerError().body("Internal Server Error")
+        }
+    }
+}
+// }
+
+async fn get_todays_tempc() -> impl Responder {
+    match todays_data().await {
+        Ok(sensor_data) => {
+            let tempc_vec: Vec<String> = sensor_data.iter().map(|x| x.tempc.clone()).collect();
+            HttpResponse::Ok().json(tempc_vec)
+        }
+        Err(e) => {
+            eprintln!("Error querying the database: {}", e);
+            HttpResponse::InternalServerError().body("Internal Server Error")
+        }
+    }
+}
+
+async fn get_todays_humi() -> impl Responder {
+    match todays_data().await {
+        Ok(sensor_data) => {
+            let humi_vec: Vec<String> = sensor_data.iter().map(|x| x.humi.clone()).collect();
+            HttpResponse::Ok().json(humi_vec)
+        }
+        Err(e) => {
+            eprintln!("Error querying the database: {}", e);
+            HttpResponse::InternalServerError().body("Internal Server Error")
+        }
+    }
 }
 
 async fn tempc() -> impl Responder {
@@ -84,6 +154,9 @@ async fn main() -> std::io::Result<()> {
             .route("/tempf", web::get().to(tempf))
             .route("/humi", web::get().to(humi))
             .route("/timestamp", web::get().to(time_stamp))
+            .route("/todays_tempf", web::get().to(get_todays_tempf))
+            .route("/todays_humi", web::get().to(get_todays_humi))
+            .route("/todays_tempc", web::get().to(get_todays_tempc))
         })
     .bind("10.0.4.60:8080")?
     .run()
