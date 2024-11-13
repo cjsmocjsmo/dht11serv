@@ -41,7 +41,7 @@ async fn todays_data() -> Result<Vec<SensorData>> {
     let date = get_current_date();
     let conn = Connection::open("/usr/share/dht11rs/dht11rs/sensor_data.db")?;
     let stmstr = format!(
-        "SELECT id, tempc, tempf, humi, date, time, timestamp FROM sensor WHERE date = '{}'",
+        "SELECT id, tempc, tempf, humi, date, time, timestamp FROM sensorhour WHERE date = '{}'",
         date
     );
     let mut stmt = conn.prepare(&stmstr)?;
