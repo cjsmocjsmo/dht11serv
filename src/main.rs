@@ -13,11 +13,12 @@ struct SensorData {
     date: String,
     time: String,
     timestamp: String,
+    cputemp: String,
 }
 
 async fn get_last_entry() -> Result<SensorData> {
     let conn = Connection::open("/usr/share/dht11rs/dht11rs/sensor_data.db")?;
-    let mut stmt = conn.prepare("SELECT id, tempc, tempf, humi, date, time, timestamp FROM sensor ORDER BY id DESC LIMIT 1")?;
+    let mut stmt = conn.prepare("SELECT * FROM sensor ORDER BY id DESC LIMIT 1")?;
     let sensor_data = stmt.query_row(params![], |row| {
         Ok(SensorData {
             id: row.get(0)?,
@@ -27,6 +28,7 @@ async fn get_last_entry() -> Result<SensorData> {
             date: row.get(4)?,
             time: row.get(5)?,
             timestamp: row.get(6)?,
+            cputemp: row.get(7)?,
         })
     })?;
     Ok(sensor_data)
@@ -47,7 +49,7 @@ async fn todays_data() -> Result<Vec<SensorData>> {
     let date = get_current_date();
     let conn = Connection::open("/usr/share/dht11rs/dht11rs/sensor_data.db")?;
     let stmstr = format!(
-        "SELECT id, tempc, tempf, humi, date, time, timestamp FROM sensorhour WHERE date = '{}'",
+        "SELECT * FROM sensorhour WHERE date = '{}'",
         date
     );
     let mut stmt = conn.prepare(&stmstr)?;
@@ -60,6 +62,7 @@ async fn todays_data() -> Result<Vec<SensorData>> {
             date: row.get(4)?,
             time: row.get(5)?,
             timestamp: row.get(6)?,
+            cputemp: row.get(7)?,
         })
     })?;
     
@@ -71,7 +74,7 @@ async fn yesterdays_data() -> Result<Vec<SensorData>> {
     let date = get_yesterdays_date();
     let conn = Connection::open("/usr/share/dht11rs/dht11rs/sensor_data.db")?;
     let stmstr = format!(
-        "SELECT id, tempc, tempf, humi, date, time, timestamp FROM sensorhour WHERE date = '{}'",
+        "SELECT * FROM sensorhour WHERE date = '{}'",
         date
     );
     let mut stmt = conn.prepare(&stmstr)?;
@@ -84,6 +87,7 @@ async fn yesterdays_data() -> Result<Vec<SensorData>> {
             date: row.get(4)?,
             time: row.get(5)?,
             timestamp: row.get(6)?,
+            cputemp: row.get(7)?,
         })
     })?;
     
@@ -209,6 +213,14 @@ async fn time_stamp() -> impl Responder {
     }
 }
 
+async fn cpu_temp() -> impl Responder {
+    let mut sys = System::new_all();
+    sys.refresh_all();
+    let cpu_temp = sys.cpus().iter().map(|cpu| cpu.temperature()).collect::<Vec<_>>();
+    
+    HttpResponse::Ok().json(cpu_temp)
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
@@ -228,7 +240,7 @@ async fn main() -> std::io::Result<()> {
             .route("/yesterdays_tempf", web::get().to(get_yesterdays_tempf))
             .route("/yesterdays_humi", web::get().to(get_yesterdays_humi))
             .route("/yesterdays_tempc", web::get().to(get_yesterdays_tempc))
-
+            .route("/cpu_temp", web::get().to(cpu_temp))
         })
     .bind("10.0.4.60:8080")?
     .run()
