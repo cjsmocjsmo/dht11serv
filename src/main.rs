@@ -233,7 +233,8 @@ async fn main() -> std::io::Result<()> {
             .route("/yesterdays_humi", web::get().to(get_yesterdays_humi))
             .route("/yesterdays_tempc", web::get().to(get_yesterdays_tempc))
         })
-    .bind("10.0.4.72:8080")?
+    .bind("10.0.4.112:8080")?
+    // .bind("10.0.4.72:8080")?
     .run()
     .await
 }
