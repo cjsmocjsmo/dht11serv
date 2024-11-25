@@ -13,7 +13,6 @@ struct SensorData {
     date: String,
     time: String,
     timestamp: String,
-    cputemp: String,
 }
 
 async fn get_last_entry() -> Result<SensorData> {
@@ -28,7 +27,6 @@ async fn get_last_entry() -> Result<SensorData> {
             date: row.get(4)?,
             time: row.get(5)?,
             timestamp: row.get(6)?,
-            cputemp: row.get(7)?,
         })
     })?;
     Ok(sensor_data)
@@ -62,7 +60,6 @@ async fn todays_data() -> Result<Vec<SensorData>> {
             date: row.get(4)?,
             time: row.get(5)?,
             timestamp: row.get(6)?,
-            cputemp: row.get(7)?,
         })
     })?;
     
@@ -87,7 +84,6 @@ async fn yesterdays_data() -> Result<Vec<SensorData>> {
             date: row.get(4)?,
             time: row.get(5)?,
             timestamp: row.get(6)?,
-            cputemp: row.get(7)?,
         })
     })?;
     
