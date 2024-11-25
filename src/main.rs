@@ -213,14 +213,6 @@ async fn time_stamp() -> impl Responder {
     }
 }
 
-async fn cpu_temp() -> impl Responder {
-    let mut sys = System::new_all();
-    sys.refresh_all();
-    let cpu_temp = sys.cpus().iter().map(|cpu| cpu.temperature()).collect::<Vec<_>>();
-    
-    HttpResponse::Ok().json(cpu_temp)
-}
-
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
@@ -240,9 +232,8 @@ async fn main() -> std::io::Result<()> {
             .route("/yesterdays_tempf", web::get().to(get_yesterdays_tempf))
             .route("/yesterdays_humi", web::get().to(get_yesterdays_humi))
             .route("/yesterdays_tempc", web::get().to(get_yesterdays_tempc))
-            .route("/cpu_temp", web::get().to(cpu_temp))
         })
-    .bind("10.0.4.60:8080")?
+    .bind("10.0.4.72:8080")?
     .run()
     .await
 }
