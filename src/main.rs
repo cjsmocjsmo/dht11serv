@@ -214,6 +214,7 @@ async fn time_stamp() -> impl Responder {
 async fn main() -> std::io::Result<()> {
     let localip = local_ip().unwrap();
     let ipaddr = format!("http://{}:8080", localip);
+    println!("{}", ipaddr);
 
     HttpServer::new(|| {
         App::new()
