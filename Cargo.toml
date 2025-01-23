@@ -11,3 +11,4 @@ serde_json = "1.0"
 rusqlite = { version = "0.26", features = ["bundled"] }
 chrono = "0.4.38"
 sysinfo = "0.32.0"
+local-ip-address = "0.4" 

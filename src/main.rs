@@ -3,6 +3,7 @@ use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use rusqlite::{params, Connection, Result};
 use serde::Serialize;
 use chrono::{DateTime, Local};
+use local_ip_address::local_ip;
 
 #[derive(Serialize)]
 struct SensorData {
@@ -211,6 +212,9 @@ async fn time_stamp() -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    let localip = local_ip().unwrap();
+    let ipaddr = format!("http://{}:8080", localip);
+
     HttpServer::new(|| {
         App::new()
             .wrap(Cors::default()
@@ -229,7 +233,8 @@ async fn main() -> std::io::Result<()> {
             .route("/yesterdays_humi", web::get().to(get_yesterdays_humi))
             .route("/yesterdays_tempc", web::get().to(get_yesterdays_tempc))
         })
-    .bind("10.0.4.112:8080")?
+    .bind(ipaddr)?
+    // .bind("10.0.4.112:8080")?
     // .bind("10.0.4.72:8080")?
     .run()
     .await
