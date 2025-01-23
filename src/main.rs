@@ -17,7 +17,7 @@ struct SensorData {
 }
 
 async fn get_last_entry() -> Result<SensorData> {
-    let conn = Connection::open("/usr/share/dht11rs/dht11rs/sensor_data.db")?;
+    let conn = Connection::open("/usr/share/dht11rs/sensor_data.db")?;
     let mut stmt = conn.prepare("SELECT * FROM sensor ORDER BY id DESC LIMIT 1")?;
     let sensor_data = stmt.query_row(params![], |row| {
         Ok(SensorData {
@@ -46,7 +46,7 @@ fn get_yesterdays_date() -> String {
 
 async fn todays_data() -> Result<Vec<SensorData>> {
     let date = get_current_date();
-    let conn = Connection::open("/usr/share/dht11rs/dht11rs/sensor_data.db")?;
+    let conn = Connection::open("/usr/share/dht11rs/sensor_data.db")?;
     let stmstr = format!(
         "SELECT * FROM sensorhour WHERE date = '{}'",
         date
@@ -70,7 +70,7 @@ async fn todays_data() -> Result<Vec<SensorData>> {
 
 async fn yesterdays_data() -> Result<Vec<SensorData>> {
     let date = get_yesterdays_date();
-    let conn = Connection::open("/usr/share/dht11rs/dht11rs/sensor_data.db")?;
+    let conn = Connection::open("/usr/share/dht11rs/sensor_data.db")?;
     let stmstr = format!(
         "SELECT * FROM sensorhour WHERE date = '{}'",
         date
