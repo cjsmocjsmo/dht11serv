@@ -213,7 +213,7 @@ async fn time_stamp() -> impl Responder {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let localip = local_ip().unwrap();
-    let ipaddr = format!("http://{}:8080", localip);
+    let ipaddr = format!("{}:8080", localip);
     println!("{}", ipaddr);
 
     HttpServer::new(|| {
