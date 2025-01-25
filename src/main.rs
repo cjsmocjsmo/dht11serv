@@ -10,6 +10,7 @@ struct SensorData {
     id: i64,
     tempc: String,
     tempf: String,
+    tempo: String,
     humi: String,
     date: String,
     time: String,
@@ -24,10 +25,11 @@ async fn get_last_entry() -> Result<SensorData> {
             id: row.get(0)?,
             tempc: row.get(1)?,
             tempf: row.get(2)?,
-            humi: row.get(3)?,
-            date: row.get(4)?,
-            time: row.get(5)?,
-            timestamp: row.get(6)?,
+            tempo: row.get(3)?,
+            humi: row.get(4)?,
+            date: row.get(5)?,
+            time: row.get(6)?,
+            timestamp: row.get(7)?,
         })
     })?;
     Ok(sensor_data)
@@ -57,10 +59,11 @@ async fn todays_data() -> Result<Vec<SensorData>> {
             id: row.get(0)?,
             tempc: row.get(1)?,
             tempf: row.get(2)?,
-            humi: row.get(3)?,
-            date: row.get(4)?,
-            time: row.get(5)?,
-            timestamp: row.get(6)?,
+            tempo: row.get(3)?,
+            humi: row.get(4)?,
+            date: row.get(5)?,
+            time: row.get(6)?,
+            timestamp: row.get(7)?,
         })
     })?;
     
@@ -81,10 +84,11 @@ async fn yesterdays_data() -> Result<Vec<SensorData>> {
             id: row.get(0)?,
             tempc: row.get(1)?,
             tempf: row.get(2)?,
-            humi: row.get(3)?,
-            date: row.get(4)?,
-            time: row.get(5)?,
-            timestamp: row.get(6)?,
+            tempo: row.get(3)?,
+            humi: row.get(4)?,
+            date: row.get(5)?,
+            time: row.get(6)?,
+            timestamp: row.get(7)?,
         })
     })?;
     
@@ -190,6 +194,16 @@ async fn tempf() -> impl Responder {
     }
 }
 
+async fn tempo() -> impl Responder {
+    match get_last_entry().await {
+        Ok(sensor_data) => HttpResponse::Ok().json(sensor_data.tempo),
+        Err(e) => {
+            eprintln!("Error querying the database: {}", e);
+            HttpResponse::InternalServerError().body("Internal Server Error")
+        }
+    }
+}
+
 async fn humi() -> impl Responder {
     match get_last_entry().await {
         Ok(sensor_data) => HttpResponse::Ok().json(sensor_data.humi),
@@ -225,6 +239,7 @@ async fn main() -> std::io::Result<()> {
                 .max_age(3600))
             .route("/tempc", web::get().to(tempc))
             .route("/tempf", web::get().to(tempf))
+            .route("/tempo", web::get().to(tempo))
             .route("/humi", web::get().to(humi))
             .route("/timestamp", web::get().to(time_stamp))
             .route("/todays_tempf", web::get().to(get_todays_tempf))
