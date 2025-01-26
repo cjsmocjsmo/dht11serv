@@ -5,7 +5,7 @@ use serde::Serialize;
 use chrono::{DateTime, Local};
 use local_ip_address::local_ip;
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 struct SensorData {
     id: i64,
     tempc: String,
@@ -73,6 +73,7 @@ async fn todays_data() -> Result<Vec<SensorData>> {
 
 async fn yesterdays_data() -> Result<Vec<SensorData>> {
     let date = get_yesterdays_date();
+    println!("{}", date);
     let conn = Connection::open("/usr/share/dht11rs/sensor_data.db")?;
     let stmstr = format!(
         "SELECT * FROM sensorhour WHERE date = '{}'",
@@ -93,6 +94,7 @@ async fn yesterdays_data() -> Result<Vec<SensorData>> {
     })?;
     
     let sensor_data_vec: Vec<SensorData> = sensor_data_iter.filter_map(Result::ok).collect();
+    println!("{:?}", sensor_data_vec);
     Ok(sensor_data_vec)
 }
 
