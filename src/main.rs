@@ -174,6 +174,32 @@ async fn get_yesterdays_humi() -> impl Responder {
     }
 }
 
+async fn get_todays_tempo() -> impl Responder {
+    match todays_data().await {
+        Ok(sensor_data) => {
+            let tempo_vec: Vec<String> = sensor_data.iter().map(|x| x.tempo.clone()).collect();
+            HttpResponse::Ok().json(tempo_vec)
+        }
+        Err(e) => {
+            eprintln!("Error querying the database: {}", e);
+            HttpResponse::InternalServerError().body("Internal Server Error")
+        }
+    }
+}
+
+async fn get_yesterdays_tempo() -> impl Responder {
+    match yesterdays_data().await {
+        Ok(sensor_data) => {
+            let tempo_vec: Vec<String> = sensor_data.iter().map(|x| x.tempo.clone()).collect();
+            HttpResponse::Ok().json(tempo_vec)
+        }
+        Err(e) => {
+            eprintln!("Error querying the database: {}", e);
+            HttpResponse::InternalServerError().body("Internal Server Error")
+        }
+    }
+}
+
 async fn tempc() -> impl Responder {
     match get_last_entry().await {
         Ok(sensor_data) => HttpResponse::Ok().json(sensor_data.tempc),
@@ -245,9 +271,11 @@ async fn main() -> std::io::Result<()> {
             .route("/todays_tempf", web::get().to(get_todays_tempf))
             .route("/todays_humi", web::get().to(get_todays_humi))
             .route("/todays_tempc", web::get().to(get_todays_tempc))
+            .route("/todays_tempo", web::get().to(get_todays_tempo))
             .route("/yesterdays_tempf", web::get().to(get_yesterdays_tempf))
             .route("/yesterdays_humi", web::get().to(get_yesterdays_humi))
             .route("/yesterdays_tempc", web::get().to(get_yesterdays_tempc))
+            .route("/yesterdays_tempo", web::get().to(get_yesterdays_tempo))
         })
     .bind(ipaddr)?
     // .bind("10.0.4.112:8080")?
